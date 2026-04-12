@@ -33,22 +33,16 @@ NiceOneL = {
 
 local defaultMessages = {
     de = {
-        "Möge die Macht mit euch sein – NiceOne ist dabei!",
-        "Ich bin zurück. Hasta la vista, Bosse!",
-        "NiceOne meldet sich zum Dienst. You shall not wipe!",
-        "Hallo zusammen! Im Dungeon gibt es keine Löffel – nur Loot.",
-        "Moin! Mein Name ist NiceOne. Geschüttelt, nicht gewipet.",
-        "Houston, ich hab die Gruppe gefunden – wir haben kein Problem!",
-        "Gemeinsam fliegen wir, gemeinsam looten wir.",
+        "Hey zusammen! Wie Eleven sagen würde: Friends don't wipe. Schön dabei zu sein!",
+        "Moin! Laut Dr. Cox bin ich zwar niemand – aber heute bin ich euer NiceOne. Los geht's!",
+        "Hallo! Malcolm hier – nein, NiceOne. Aber ich hab auch einen Plan. Meistens.",
+        "Hi Leute! Wubba Lubba Dub Dub – NiceOne ist bereit für Action!",
     },
     en = {
-        "May the loot be with you – NiceOne has arrived!",
-        "I'll be your guide today. There is no wipe, only skill.",
-        "NiceOne reporting for duty. You shall not wipe!",
-        "Hello everyone! There is no spoon – but there might be loot.",
-        "The name's NiceOne. Let's make this run legendary.",
-        "Houston, I found the group – and we have no problem!",
-        "I am your huckleberry. Let's do this!",
+        "Hey everyone! As Eleven would say: Friends don't wipe. Happy to be here!",
+        "Hi there! Dr. Cox would call me a newbie – but today I am your NiceOne. Let's go!",
+        "Hello! Malcolm in the middle of this dungeon. NiceOne reporting, I have a plan. Mostly.",
+        "Hey team! Wubba Lubba Dub Dub – NiceOne is ready for action!",
     },
 }
 
@@ -83,18 +77,18 @@ local function SaveDB()
     NiceOneDB.messages = NiceOneMessages
 end
 
-local lastIndex    = nil
-local inRaid       = false
-local raidGreeted  = false
-local partyMembers = {}
+local lastIndex        = nil
+local inRaid           = false
+local raidGreeted      = false
+local instanceGreeted  = false
+local partyMembers     = {}
+local lastGroupSize    = 0
 
--- Richtigen Chat-Kanal ermitteln
 local function GetChannel()
     if IsInRaid() and NiceOneInRaid then
         return "RAID"
     elseif IsInGroup() and not IsInRaid() and NiceOneInParty then
-        local inInstance = IsInInstance()
-        if inInstance then
+        if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
             return "INSTANCE_CHAT"
         else
             return "PARTY"
@@ -158,49 +152,78 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         return
     end
 
-    if event == "PLAYER_ENTERING_WORLD" then
+   if event == "PLAYER_ENTERING_WORLD" then
         partyMembers = GetCurrentPartyMembers()
+        lastGroupSize = GetNumGroupMembers()
         inRaid = IsInRaid()
         raidGreeted = false
+        instanceGreeted = false
         return
     end
 
     if event == "GROUP_JOINED" then
-        C_Timer.After(1, function()
-            if IsInRaid() and NiceOneInRaid and not raidGreeted then
-                SendGreeting()
-                raidGreeted = true
-            elseif IsInGroup() and not IsInRaid() and NiceOneInParty then
-                SendGreeting()
-            end
-        end)
+        if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and not instanceGreeted then
+            instanceGreeted = true
+            C_Timer.After(1, function()
+                if NiceOneInParty then
+                    SendGreeting()
+                end
+            end)
+        elseif IsInRaid() and not raidGreeted then
+            raidGreeted = true
+            C_Timer.After(1, function()
+                if NiceOneInRaid then
+                    SendGreeting()
+                end
+            end)
+        end
         return
     end
 
     if event == "GROUP_ROSTER_UPDATE" then
-        C_Timer.After(0.5, function()
+        C_Timer.After(2.5, function()
             if IsInRaid() then
                 if not inRaid and NiceOneInRaid and not raidGreeted then
                     SendGreeting()
                     raidGreeted = true
                 end
                 inRaid = true
+
             elseif IsInGroup() then
-                if NiceOneInParty then
-                    local current = GetCurrentPartyMembers()
-                    for name, _ in pairs(current) do
-                        if not partyMembers[name] then
-                            SendGreeting()
-                        end
+                if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+                    if not instanceGreeted and NiceOneInParty then
+                        instanceGreeted = true
+                        SendGreeting()
                     end
-                    partyMembers = current
+                else
+                    -- Normale Party: nur grüßen wenn jemand NEU dazugekommen ist
+                     if NiceOneInParty then
+                        local current = GetCurrentPartyMembers()
+                        local currentSize = GetNumGroupMembers()
+                        -- Nur grüßen wenn die Gruppe größer geworden ist
+                        if currentSize > lastGroupSize then
+                            local newPlayerFound = false
+                            for name, _ in pairs(current) do
+                                if not partyMembers[name] then
+                                    newPlayerFound = true
+                                end
+                            end
+                            if newPlayerFound then
+                                SendGreeting()
+                            end
+                        end
+                        lastGroupSize = currentSize
+                        partyMembers = current
+                    end
                 end
                 inRaid = false
                 raidGreeted = false
+
             else
                 partyMembers = {}
                 inRaid = false
                 raidGreeted = false
+                instanceGreeted = false
             end
         end)
     end

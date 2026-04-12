@@ -164,14 +164,14 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "GROUP_JOINED" then
         if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and not instanceGreeted then
             instanceGreeted = true
-            C_Timer.After(1, function()
+            C_Timer.After(2.5, function()
                 if NiceOneInParty then
                     SendGreeting()
                 end
             end)
         elseif IsInRaid() and not raidGreeted then
             raidGreeted = true
-            C_Timer.After(1, function()
+            C_Timer.After(2.5, function()
                 if NiceOneInRaid then
                     SendGreeting()
                 end

@@ -2,7 +2,7 @@
 ## Title: NiceOne
 ## Notes: Greets your group or raid when you join
 ## Author: NiceOne
-## Version: v1.0.4-alpha
+## Version: v1.0.5-alpha
 ## SavedVariables: NiceOneDB
 
 NiceOne.lua

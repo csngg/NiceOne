@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version (z.B. 1.0.5-alpha)'
+        required: true
+      notes:
+        description: 'Was ist neu?'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: ZIP erstellen
+        run: |
+          mkdir /tmp/NiceOne
+          cp *.lua *.toc /tmp/NiceOne/
+          cd /tmp
+          zip -r NiceOne.zip NiceOne/
+          mv NiceOne.zip $GITHUB_WORKSPACE/
+
+      - name: Release auf GitHub erstellen
+        run: |
+          gh release create "${{ inputs.tag }}" NiceOne.zip \
+            --title "${{ inputs.tag }}" \
+            --notes "${{ inputs.notes }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Discord Nachricht senden
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{
+            \"content\": \"@here**NiceOne ${{ inputs.tag }} ist da!**\n\n${{ inputs.notes }}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${{ inputs.tag }}/NiceOne.zip\"
+          }" \
+          ${{ secrets.WEBHOOK_URL }}

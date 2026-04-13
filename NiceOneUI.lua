@@ -151,43 +151,52 @@ tabLine:SetPoint("TOPRIGHT", window, "TOPRIGHT", -2, -68)
 tabLine:SetHeight(1)
 CT(tabLine, unpack(C.border))
 
--- Checkbox
-local function MakeCheckbox(parent, xOffset, yOffset, getValue, setValue)
-    local box = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    box:SetSize(14, 14)
-    box:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", xOffset, yOffset)
-    BD(box, 8)
+-- Toggle
+local function MakeToggle(parent, xOffset, yOffset, getValue, setValue)
+    local TOGGLE_W = 36
+    local TOGGLE_H = 16
+    local KNOB_SIZE = 12
 
-    local check = box:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    check:SetAllPoints()
-    check:SetText("v")
-    check:SetFont(check:GetFont(), 9, "OUTLINE")
-    check:SetTextColor(unpack(C.teal))
+    local track = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    track:SetSize(TOGGLE_W, TOGGLE_H)
+    track:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", xOffset, yOffset + 2)
+    track:SetBackdrop({
+    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeSize = 0,
+    insets = {left=2, right=2, top=2, bottom=2},
+})
+
+    local knob = track:CreateTexture(nil, "OVERLAY")
+    knob:SetSize(KNOB_SIZE, KNOB_SIZE)
 
     local labelText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    labelText:SetPoint("LEFT", box, "RIGHT", 6, 0)
+    labelText:SetPoint("LEFT", track, "RIGHT", 6, 0)
     labelText:SetFont(labelText:GetFont(), 10, "")
     labelText:SetTextColor(unpack(C.textMuted))
 
-    local function UpdateCheck()
+    local function UpdateToggle()
         if getValue() then
-            check:Show()
-            box:SetBackdropColor(unpack(C.tealBg))
-            box:SetBackdropBorderColor(unpack(C.teal))
+            track:SetBackdropColor(unpack(C.tealBg))
+            track:SetBackdropBorderColor(unpack(C.teal))
+            knob:SetColorTexture(unpack(C.teal))
+            knob:ClearAllPoints()
+            knob:SetPoint("RIGHT", track, "RIGHT", -3, 0)
         else
-            check:Hide()
-            box:SetBackdropColor(unpack(C.bgDark))
-            box:SetBackdropBorderColor(unpack(C.borderSub))
+            track:SetBackdropColor(unpack(C.bgDark))
+            track:SetBackdropBorderColor(unpack(C.borderSub))
+            knob:SetColorTexture(unpack(C.textDim))
+            knob:ClearAllPoints()
+            knob:SetPoint("LEFT", track, "LEFT", 3, 0)
         end
     end
 
-    box:SetScript("OnClick", function()
+    track:SetScript("OnClick", function()
         setValue(not getValue())
-        UpdateCheck()
+        UpdateToggle()
     end)
 
-    UpdateCheck()
-    return box, labelText, UpdateCheck
+    UpdateToggle()
+    return track, labelText, UpdateToggle
 end
 
 -- Check Bereich
@@ -208,13 +217,13 @@ checkLabel:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 14, 96)
 checkLabel:SetFont(checkLabel:GetFont(), 10, "")
 checkLabel:SetTextColor(unpack(C.textDim))
 
-local partyCheck, partyLabel, partyUpdate = MakeCheckbox(
+local partyCheck, partyLabel, partyUpdate = MakeToggle(
     window, 130, 91,
     function() return NiceOneInParty end,
     function(v) NiceOneInParty = v end
 )
 
-local raidCheck, raidLabel, raidUpdate = MakeCheckbox(
+local raidCheck, raidLabel, raidUpdate = MakeToggle(
     window, 220, 91,
     function() return NiceOneInRaid end,
     function(v) NiceOneInRaid = v end
@@ -542,3 +551,146 @@ function NiceOneUI_Toggle()
         window:Show()
     end
 end
+-- Impressum Popup
+local infoPopup = CreateFrame("Frame", "NiceOneInfoPopup", UIParent, "BackdropTemplate")
+infoPopup:SetSize(340, 260)
+infoPopup:SetPoint("CENTER", window, "CENTER", 0, 0)
+infoPopup:SetBackdrop({
+    bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+    edgeSize = 14,
+    insets   = {left=3, right=3, top=3, bottom=3},
+})
+infoPopup:SetBackdropColor(unpack(C.bgDark))
+infoPopup:SetBackdropBorderColor(unpack(C.teal))
+infoPopup:SetFrameStrata("TOOLTIP")
+infoPopup:Hide()
+
+-- Titel
+local infoTitle = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+infoTitle:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -14)
+infoTitle:SetTextColor(unpack(C.teal))
+infoTitle:SetFont(infoTitle:GetFont(), 11, "")
+infoTitle:SetText("NiceOne – Info & Support")
+
+-- Trennlinie
+local infoLine = infoPopup:CreateTexture(nil, "ARTWORK")
+infoLine:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 3, -30)
+infoLine:SetPoint("TOPRIGHT", infoPopup, "TOPRIGHT", -3, -30)
+infoLine:SetHeight(1)
+CT(infoLine, unpack(C.teal))
+
+-- Haftungsausschluss DE
+local infoTextDE = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+infoTextDE:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -42)
+infoTextDE:SetWidth(310)
+infoTextDE:SetJustifyH("LEFT")
+infoTextDE:SetFont(infoTextDE:GetFont(), 9, "")
+infoTextDE:SetTextColor(unpack(C.textMuted))
+infoTextDE:SetText("Dieses Addon wird ohne Gewähr bereitgestellt.\nDer Autor übernimmt keine Verantwortung für\nNachrichten die über dieses Addon gesendet\nwerden oder daraus entstehende Konsequenzen.")
+
+-- Trennlinie 2
+local infoLine2 = infoPopup:CreateTexture(nil, "ARTWORK")
+infoLine2:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 3, -110)
+infoLine2:SetPoint("TOPRIGHT", infoPopup, "TOPRIGHT", -3, -110)
+infoLine2:SetHeight(1)
+CT(infoLine2, unpack(C.borderSub))
+
+-- Haftungsausschluss EN
+local infoTextEN = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+infoTextEN:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -118)
+infoTextEN:SetWidth(310)
+infoTextEN:SetJustifyH("LEFT")
+infoTextEN:SetFont(infoTextEN:GetFont(), 9, "")
+infoTextEN:SetTextColor(unpack(C.textDim))
+infoTextEN:SetText("This addon is provided as-is. The author is not\nresponsible for any messages sent through this\naddon or any consequences arising from its use.")
+
+-- Discord Button
+local discordBtn = CreateFrame("Button", nil, infoPopup, "BackdropTemplate")
+discordBtn:SetSize(140, 24)
+discordBtn:SetPoint("BOTTOMLEFT", infoPopup, "BOTTOMLEFT", 14, 14)
+discordBtn:SetBackdrop({
+    bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeSize = 0,
+    insets  = {left=2, right=2, top=2, bottom=2},
+})
+discordBtn:SetBackdropColor(unpack(C.tealBg))
+local discordTex = discordBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+discordTex:SetAllPoints()
+discordTex:SetFont(discordTex:GetFont(), 9, "")
+discordTex:SetTextColor(unpack(C.teal))
+discordTex:SetText("Discord – demnächst verfügbar")
+discordBtn:SetScript("OnClick", function()
+    -- Platzhalter: später echten Link einfügen
+    print("|cff4DB7AC[NiceOne]|r Discord: demnächst verfügbar")
+end)
+discordBtn:SetScript("OnEnter", function()
+    discordBtn:SetBackdropColor(0.110, 0.260, 0.240, 0.7)
+end)
+discordBtn:SetScript("OnLeave", function()
+    discordBtn:SetBackdropColor(unpack(C.tealBg))
+end)
+
+-- Support Button
+local supportBtn = CreateFrame("Button", nil, infoPopup, "BackdropTemplate")
+supportBtn:SetSize(140, 24)
+supportBtn:SetPoint("BOTTOMRIGHT", infoPopup, "BOTTOMRIGHT", -14, 14)
+supportBtn:SetBackdrop({
+    bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeSize = 0,
+    insets  = {left=2, right=2, top=2, bottom=2},
+})
+supportBtn:SetBackdropColor(unpack(C.tealBg))
+local supportTex = supportBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+supportTex:SetAllPoints()
+supportTex:SetFont(supportTex:GetFont(), 9, "")
+supportTex:SetTextColor(unpack(C.teal))
+supportTex:SetText("Support – demnächst verfügbar")
+supportBtn:SetScript("OnClick", function()
+    -- Platzhalter: später echten Link einfügen
+    print("|cff4DB7AC[NiceOne]|r Support: demnächst verfügbar")
+end)
+supportBtn:SetScript("OnEnter", function()
+    supportBtn:SetBackdropColor(0.110, 0.260, 0.240, 0.7)
+end)
+supportBtn:SetScript("OnLeave", function()
+    supportBtn:SetBackdropColor(unpack(C.tealBg))
+end)
+
+-- Popup schließen wenn außerhalb geklickt
+infoPopup:SetScript("OnMouseDown", function(self, button)
+    if button == "RightButton" or button == "LeftButton" then
+        infoPopup:Hide()
+    end
+end)
+
+-- "i" Button im Footer
+local infoBtn = CreateFrame("Button", nil, window, "BackdropTemplate")
+infoBtn:SetSize(18, 18)
+infoBtn:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -10, 11)
+infoBtn:SetBackdrop({
+    bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeSize = 0,
+    insets   = {left=2, right=2, top=2, bottom=2},
+})
+infoBtn:SetBackdropColor(unpack(C.bgMid))
+local infoBtnTex = infoBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+infoBtnTex:SetAllPoints()
+infoBtnTex:SetFont(infoBtnTex:GetFont(), 11, "OUTLINE")
+infoBtnTex:SetTextColor(unpack(C.textMuted))
+infoBtnTex:SetText("i")
+infoBtn:SetScript("OnClick", function()
+    if infoPopup:IsShown() then
+        infoPopup:Hide()
+    else
+        infoPopup:Show()
+    end
+end)
+infoBtn:SetScript("OnEnter", function()
+    infoBtnTex:SetTextColor(unpack(C.teal))
+    infoBtn:SetBackdropColor(unpack(C.tealBg))
+end)
+infoBtn:SetScript("OnLeave", function()
+    infoBtnTex:SetTextColor(unpack(C.textMuted))
+    infoBtn:SetBackdropColor(unpack(C.bgMid))
+end)

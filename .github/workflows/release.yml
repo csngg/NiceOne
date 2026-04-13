@@ -1,9 +1,11 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version (z.B. 1.0.5-alpha)'
+        required: true
 
 permissions:
   contents: write
@@ -14,17 +16,17 @@ jobs:
     steps:
       - name: Code auschecken
         uses: actions/checkout@v3
+        with:
+          path: NiceOne
 
       - name: ZIP erstellen
         run: |
-          mkdir -p NiceOne
-          cp *.lua *.toc NiceOne/
-          zip -r NiceOne.zip NiceOne/
+          zip -r NiceOne.zip NiceOne/ --exclude "NiceOne/.git/*" --exclude "NiceOne/.github/*"
 
       - name: Release auf GitHub erstellen
         run: |
-          gh release create "${{ github.ref_name }}" NiceOne.zip \
-            --title "${{ github.ref_name }}" \
-            --notes "Alpha Release ${{ github.ref_name }}"
+          gh release create "${{ inputs.tag }}" NiceOne.zip \
+            --title "${{ inputs.tag }}" \
+            --notes "Alpha Release ${{ inputs.tag }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

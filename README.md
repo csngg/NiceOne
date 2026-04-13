@@ -1,19 +1,20 @@
 # NiceOne
 WoW Addon – greets your group
+
+NiceOne – Weil ein gutes Timing nicht für jeden ist.
 #
-NiceOne – Alpha
-Du bist lazy as fuck, boooii – möchtest aber dennoch nice sein? Du musst vor dem Dungeon noch schnell deine Talente ändern und vergisst dabei höflich zu sein?
-NiceOne begrüßt deine Gruppe automatisch – damit du es nicht musst.
-Was NiceOne aktuell kann:
+Du bist lazy as fuck, booooiii – oder du bist always too late und musst noch schnell die Talente ändern, während alle schon im Dungeon stehen. 
+Vielleicht bist du auch einfach der Typ, der nie was sagt, aber trotzdem ein nice one sein will.
+Kein Problem. Dafür gibt's NiceOne.
 
-🎬 Zufällige Begrüßungen aus einer Sammlung nerdiger Filmzitate – keine Wiederholung zweimal hintereinander
-🌍 Deutsch & Englisch wählbar
-⚔️ Party-Modus: Jeder neue Spieler wird einzeln begrüßt wenn er joint
-🛡️ Raid-Modus: Nur eine einmalige Begrüßung wenn du selbst dem Raid joingst – kein Spam
-✏️ Eigene Nachrichten hinzufügen, bearbeiten und löschen
-💾 Deine Einstellungen bleiben auch nach einem Relog erhalten
-🎨 Modernes dunkles UI mit Türkis-Akzenten
-📂 Öffnen mit /niceone oder /greet
+Was macht NiceOne?
+NiceOne begrüßt deine Mitstreiter automatisch – damit du dich voll auf das Wesentliche konzentrieren kannst. Talente. Pots. Den Tank, der schon gepullt hat.
 
+🗡️ Mythic+ – Jeder neue Spieler in deiner Party bekommt eine persönliche Begrüßung. Weil eine kleine Gruppe sich wie ein Team anfühlen soll.
 
-⚠️ Alpha-Version – Feedback sehr willkommen, Bugs möglich!
+⚔️ Raid & Instanzgruppen – Einmal begrüßt, gut ist. Kein Spam, kein Chaos – nur ein solides Hey wenn du selbst joinst.
+
+Wie funktioniert's?
+Installieren, einloggen, fertig. NiceOne läuft im Hintergrund und meldet sich genau dann, wenn es passt – nicht zu viel, nicht zu wenig. Die Beispieltexte im Addon sind Platzhalter – mach sie zu deinen eigenen und zeig deiner Gruppe, wer du wirklich bist.
+
+Weil auch lazy people ein nice one sein können.

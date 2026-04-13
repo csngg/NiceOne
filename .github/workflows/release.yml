@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v3
+
+      - name: ZIP erstellen
+        run: |
+          mkdir -p NiceOne
+          cp *.lua *.toc NiceOne/
+          zip -r NiceOne.zip NiceOne/
+
+      - name: Release auf GitHub erstellen
+        run: |
+          gh release create "${{ github.ref_name }}" NiceOne.zip \
+            --title "${{ github.ref_name }}" \
+            --notes "Alpha Release ${{ github.ref_name }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -40,6 +40,6 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -d "{
-            \"content\": \"@here**NiceOne ${{ inputs.tag }} ist da!**\n\n${{ inputs.notes }}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${{ inputs.tag }}/NiceOne.zip\"
+            \"content\": \"@here **NiceOne ${{ inputs.tag }} ist da!**\n\n${{ inputs.notes }}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${{ inputs.tag }}/NiceOne.zip\"
           }" \
           ${{ secrets.WEBHOOK_URL }}

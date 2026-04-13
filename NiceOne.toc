@@ -1,8 +1,8 @@
 ## Interface: 120000
 ## Title: NiceOne
 ## Notes: Greets your group or raid when you join
-## Author: NiceOne
-## Version: v1.0.5-alpha
+## Author: csn
+## Version: v1.1.0-alpha
 ## SavedVariables: NiceOneDB
 
 NiceOne.lua

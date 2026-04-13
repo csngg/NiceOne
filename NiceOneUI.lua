@@ -1,7 +1,8 @@
 -- NiceOne Addon - UI
 
-local activeTab     = "de"
+local activeTab     = "de"   -- welche Nachrichten-Liste wird gerade bearbeitet
 local selectedIndex = nil
+local mainTab       = "greetings"  -- "greetings" oder "options"
 
 local C = {
     bg        = {0.118, 0.122, 0.133, 1},
@@ -39,7 +40,8 @@ local function L(key)
     return NiceOneL[NiceOneLanguage][key]
 end
 
--- Hauptfenster
+-- ─── Hauptfenster ────────────────────────────────────────────────────────────
+
 local window = CreateFrame("Frame", "NiceOneWindow", UIParent, "BackdropTemplate")
 window:SetSize(480, 500)
 window:SetPoint("CENTER")
@@ -95,144 +97,144 @@ titleLine:SetPoint("TOPRIGHT", window, "TOPRIGHT", -2, -32)
 titleLine:SetHeight(1)
 CT(titleLine, unpack(C.border))
 
--- Tabs
-local tabDE = CreateFrame("Frame", nil, window)
-tabDE:SetSize(110, 26)
-tabDE:SetPoint("TOPLEFT", window, "TOPLEFT", 12, -40)
+-- ─── Haupt-Tabs (Begrüßungen / Optionen) ─────────────────────────────────────
+
+local mainTabGreet = CreateFrame("Frame", nil, window)
+mainTabGreet:SetSize(130, 26)
+mainTabGreet:SetPoint("TOPLEFT", window, "TOPLEFT", 12, -40)
+mainTabGreet:EnableMouse(true)
+
+local mainTabGreetText = mainTabGreet:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+mainTabGreetText:SetPoint("LEFT", mainTabGreet, "LEFT", 0, 0)
+mainTabGreetText:SetFont(mainTabGreetText:GetFont(), 11, "")
+
+local mainTabGreetLine = mainTabGreet:CreateTexture(nil, "ARTWORK")
+mainTabGreetLine:SetPoint("BOTTOMLEFT", mainTabGreet, "BOTTOMLEFT", 0, -2)
+mainTabGreetLine:SetPoint("BOTTOMRIGHT", mainTabGreet, "BOTTOMRIGHT", 0, -2)
+mainTabGreetLine:SetHeight(2)
+
+local mainTabOpts = CreateFrame("Frame", nil, window)
+mainTabOpts:SetSize(100, 26)
+mainTabOpts:SetPoint("LEFT", mainTabGreet, "RIGHT", 8, 0)
+mainTabOpts:EnableMouse(true)
+
+local mainTabOptsText = mainTabOpts:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+mainTabOptsText:SetPoint("LEFT", mainTabOpts, "LEFT", 0, 0)
+mainTabOptsText:SetFont(mainTabOptsText:GetFont(), 11, "")
+
+local mainTabOptsLine = mainTabOpts:CreateTexture(nil, "ARTWORK")
+mainTabOptsLine:SetPoint("BOTTOMLEFT", mainTabOpts, "BOTTOMLEFT", 0, -2)
+mainTabOptsLine:SetPoint("BOTTOMRIGHT", mainTabOpts, "BOTTOMRIGHT", 0, -2)
+mainTabOptsLine:SetHeight(2)
+
+local mainTabDivider = window:CreateTexture(nil, "ARTWORK")
+mainTabDivider:SetPoint("TOPLEFT", window, "TOPLEFT", 2, -68)
+mainTabDivider:SetPoint("TOPRIGHT", window, "TOPRIGHT", -2, -68)
+mainTabDivider:SetHeight(1)
+CT(mainTabDivider, unpack(C.border))
+
+-- ─── Panel: Begrüßungen ───────────────────────────────────────────────────────
+
+local greetPanel = CreateFrame("Frame", nil, window)
+greetPanel:SetPoint("TOPLEFT", window, "TOPLEFT", 0, -70)
+greetPanel:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", 0, 38)
+greetPanel:Hide()
+
+-- Sprach-Tabs (DE / EN) – nur zur Bearbeitung, keine Sprachauswahl mehr
+local tabDE = CreateFrame("Frame", nil, greetPanel)
+tabDE:SetSize(90, 24)
+tabDE:SetPoint("TOPLEFT", greetPanel, "TOPLEFT", 12, -8)
 tabDE:EnableMouse(true)
 
-local tabDEDot = tabDE:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-tabDEDot:SetPoint("LEFT", tabDE, "LEFT", 0, 0)
-tabDEDot:SetText("O")
-tabDEDot:SetFont(tabDEDot:GetFont(), 8, "OUTLINE")
-tabDEDot:SetTextColor(unpack(C.teal))
-tabDEDot:Hide()
-
 local tabDEText = tabDE:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-tabDEText:SetPoint("LEFT", tabDE, "LEFT", 14, 0)
-tabDEText:SetText("Deutsch")
-tabDEText:SetFont(tabDEText:GetFont(), 11, "")
+tabDEText:SetPoint("LEFT", tabDE, "LEFT", 0, 0)
+tabDEText:SetFont(tabDEText:GetFont(), 10, "")
 
 local tabDELine = tabDE:CreateTexture(nil, "ARTWORK")
 tabDELine:SetPoint("BOTTOMLEFT", tabDE, "BOTTOMLEFT", 0, -2)
 tabDELine:SetPoint("BOTTOMRIGHT", tabDE, "BOTTOMRIGHT", 0, -2)
 tabDELine:SetHeight(2)
 
-local tabEN = CreateFrame("Frame", nil, window)
-tabEN:SetSize(110, 26)
+local tabEN = CreateFrame("Frame", nil, greetPanel)
+tabEN:SetSize(90, 24)
 tabEN:SetPoint("LEFT", tabDE, "RIGHT", 4, 0)
 tabEN:EnableMouse(true)
 
-local tabENDot = tabEN:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-tabENDot:SetPoint("LEFT", tabEN, "LEFT", 0, 0)
-tabENDot:SetText("O")
-tabENDot:SetFont(tabENDot:GetFont(), 8, "OUTLINE")
-tabENDot:SetTextColor(unpack(C.teal))
-tabENDot:Hide()
-
 local tabENText = tabEN:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-tabENText:SetPoint("LEFT", tabEN, "LEFT", 14, 0)
-tabENText:SetText("English")
-tabENText:SetFont(tabENText:GetFont(), 11, "")
+tabENText:SetPoint("LEFT", tabEN, "LEFT", 0, 0)
+tabENText:SetFont(tabENText:GetFont(), 10, "")
 
 local tabENLine = tabEN:CreateTexture(nil, "ARTWORK")
 tabENLine:SetPoint("BOTTOMLEFT", tabEN, "BOTTOMLEFT", 0, -2)
 tabENLine:SetPoint("BOTTOMRIGHT", tabEN, "BOTTOMRIGHT", 0, -2)
 tabENLine:SetHeight(2)
 
-local tabHint = window:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-tabHint:SetPoint("TOPLEFT", window, "TOPLEFT", 240, -50)
-tabHint:SetTextColor(unpack(C.textDim))
-tabHint:SetFont(tabHint:GetFont(), 9, "ITALIC")
+local subTabDivider = greetPanel:CreateTexture(nil, "ARTWORK")
+subTabDivider:SetPoint("TOPLEFT", greetPanel, "TOPLEFT", 2, -34)
+subTabDivider:SetPoint("TOPRIGHT", greetPanel, "TOPRIGHT", -2, -34)
+subTabDivider:SetHeight(1)
+CT(subTabDivider, unpack(C.borderSub))
 
-local tabLine = window:CreateTexture(nil, "ARTWORK")
-tabLine:SetPoint("TOPLEFT", window, "TOPLEFT", 2, -68)
-tabLine:SetPoint("TOPRIGHT", window, "TOPRIGHT", -2, -68)
-tabLine:SetHeight(1)
-CT(tabLine, unpack(C.border))
+-- Nachrichten-Rows
+local MAX_ROWS = 10
+local rows = {}
 
--- Toggle
-local function MakeToggle(parent, xOffset, yOffset, getValue, setValue)
-    local TOGGLE_W = 36
-    local TOGGLE_H = 16
-    local KNOB_SIZE = 12
+for i = 1, MAX_ROWS do
+    local rowFrame = CreateFrame("Frame", nil, greetPanel, "BackdropTemplate")
+    rowFrame:SetSize(400, 28)
+    rowFrame:SetBackdrop({
+        bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeSize = 0,
+    })
+    rowFrame:SetBackdropColor(0, 0, 0, 0)
+    rowFrame:EnableMouse(true)
+    rowFrame:Hide()
 
-    local track = CreateFrame("Button", nil, parent, "BackdropTemplate")
-    track:SetSize(TOGGLE_W, TOGGLE_H)
-    track:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", xOffset, yOffset + 2)
-    track:SetBackdrop({
-    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-    edgeSize = 0,
-    insets = {left=2, right=2, top=2, bottom=2},
-})
+    local msgText = rowFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    msgText:SetPoint("LEFT", rowFrame, "LEFT", 8, 0)
+    msgText:SetWidth(340)
+    msgText:SetJustifyH("LEFT")
+    msgText:SetFont(msgText:GetFont(), 11, "")
+    msgText:SetTextColor(unpack(C.textMuted))
 
-    local knob = track:CreateTexture(nil, "OVERLAY")
-    knob:SetSize(KNOB_SIZE, KNOB_SIZE)
+    local editBtn = CreateFrame("Button", nil, greetPanel, "BackdropTemplate")
+    editBtn:SetSize(36, 22)
+    BD(editBtn, 8)
+    editBtn:SetBackdropColor(unpack(C.tealBg))
+    editBtn:SetBackdropBorderColor(unpack(C.tealDim))
+    editBtn:Hide()
+    local editTex = editBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    editTex:SetAllPoints()
+    editTex:SetText("edit")
+    editTex:SetFont(editTex:GetFont(), 9, "")
+    editTex:SetTextColor(unpack(C.teal))
 
-    local labelText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    labelText:SetPoint("LEFT", track, "RIGHT", 6, 0)
-    labelText:SetFont(labelText:GetFont(), 10, "")
-    labelText:SetTextColor(unpack(C.textMuted))
+    local delBtn = CreateFrame("Button", nil, greetPanel, "BackdropTemplate")
+    delBtn:SetSize(30, 22)
+    BD(delBtn, 8)
+    delBtn:SetBackdropColor(unpack(C.redBg))
+    delBtn:SetBackdropBorderColor(unpack(C.redBorder))
+    delBtn:Hide()
+    local delTex = delBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    delTex:SetAllPoints()
+    delTex:SetText("del")
+    delTex:SetFont(delTex:GetFont(), 9, "")
+    delTex:SetTextColor(unpack(C.red))
 
-    local function UpdateToggle()
-        if getValue() then
-            track:SetBackdropColor(unpack(C.tealBg))
-            track:SetBackdropBorderColor(unpack(C.teal))
-            knob:SetColorTexture(unpack(C.teal))
-            knob:ClearAllPoints()
-            knob:SetPoint("RIGHT", track, "RIGHT", -3, 0)
-        else
-            track:SetBackdropColor(unpack(C.bgDark))
-            track:SetBackdropBorderColor(unpack(C.borderSub))
-            knob:SetColorTexture(unpack(C.textDim))
-            knob:ClearAllPoints()
-            knob:SetPoint("LEFT", track, "LEFT", 3, 0)
-        end
-    end
-
-    track:SetScript("OnClick", function()
-        setValue(not getValue())
-        UpdateToggle()
-    end)
-
-    UpdateToggle()
-    return track, labelText, UpdateToggle
+    rows[i] = {
+        frame  = rowFrame,
+        text   = msgText,
+        edit   = editBtn,
+        editTx = editTex,
+        del    = delBtn,
+        delTx  = delTex,
+    }
 end
 
--- Check Bereich
-local checkTopLine = window:CreateTexture(nil, "ARTWORK")
-checkTopLine:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 2, 120)
-checkTopLine:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -2, 120)
-checkTopLine:SetHeight(1)
-CT(checkTopLine, unpack(C.border))
-
-local checkBotLine = window:CreateTexture(nil, "ARTWORK")
-checkBotLine:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 2, 80)
-checkBotLine:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -2, 80)
-checkBotLine:SetHeight(1)
-CT(checkBotLine, unpack(C.border))
-
-local checkLabel = window:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-checkLabel:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 14, 96)
-checkLabel:SetFont(checkLabel:GetFont(), 10, "")
-checkLabel:SetTextColor(unpack(C.textDim))
-
-local partyCheck, partyLabel, partyUpdate = MakeToggle(
-    window, 130, 91,
-    function() return NiceOneInParty end,
-    function(v) NiceOneInParty = v end
-)
-
-local raidCheck, raidLabel, raidUpdate = MakeToggle(
-    window, 220, 91,
-    function() return NiceOneInRaid end,
-    function(v) NiceOneInRaid = v end
-)
-
--- Eingabefeld mit InputBoxTemplate
-local inputBox = CreateFrame("EditBox", nil, window, "InputBoxTemplate")
+-- Eingabefeld
+local inputBox = CreateFrame("EditBox", nil, greetPanel, "InputBoxTemplate")
 inputBox:SetSize(316, 26)
-inputBox:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 14, 50)
+inputBox:SetPoint("BOTTOMLEFT", greetPanel, "BOTTOMLEFT", 14, 6)
 inputBox:SetAutoFocus(false)
 inputBox:SetMaxLetters(200)
 inputBox:SetTextColor(unpack(C.textMuted))
@@ -258,15 +260,9 @@ inputBox:SetScript("OnEnterPressed", function(self)
     end
 end)
 
-local footerLine = window:CreateTexture(nil, "ARTWORK")
-footerLine:SetPoint("BOTTOMLEFT", window, "BOTTOMLEFT", 2, 38)
-footerLine:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -2, 38)
-footerLine:SetHeight(1)
-CT(footerLine, unpack(C.border))
-
 -- Add/Save Button
-local addBtn = CreateFrame("Button", nil, window, "BackdropTemplate")
-addBtn:SetSize(120, 26)
+local addBtn = CreateFrame("Button", nil, greetPanel, "BackdropTemplate")
+addBtn:SetSize(110, 26)
 addBtn:SetPoint("LEFT", inputBox, "RIGHT", 8, 0)
 BD(addBtn, 10)
 addBtn:SetBackdropColor(unpack(C.tealBg))
@@ -297,7 +293,163 @@ addBtn:SetScript("OnClick", function()
     end
 end)
 
--- Bestätigungsdialog
+-- ─── Panel: Optionen ──────────────────────────────────────────────────────────
+
+local optsPanel = CreateFrame("Frame", nil, window)
+optsPanel:SetPoint("TOPLEFT", window, "TOPLEFT", 0, -70)
+optsPanel:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", 0, 38)
+optsPanel:Hide()
+
+-- Toggle Hilfsfunktion
+local function MakeToggle(parent, label, xOffset, yOffset, getValue, setValue, onChanged)
+    local TOGGLE_W = 36
+    local TOGGLE_H = 16
+    local KNOB_SIZE = 12
+
+    local track = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    track:SetSize(TOGGLE_W, TOGGLE_H)
+    track:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, yOffset)
+    track:SetBackdrop({
+        bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeSize = 0,
+        insets  = {left=2, right=2, top=2, bottom=2},
+    })
+
+    local knob = track:CreateTexture(nil, "OVERLAY")
+    knob:SetSize(KNOB_SIZE, KNOB_SIZE)
+
+    local labelText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    labelText:SetPoint("LEFT", track, "RIGHT", 8, 0)
+    labelText:SetFont(labelText:GetFont(), 10, "")
+    labelText:SetTextColor(unpack(C.textMuted))
+    labelText:SetText(label)
+
+    local function UpdateVisual()
+        if getValue() then
+            track:SetBackdropColor(unpack(C.tealBg))
+            track:SetBackdropBorderColor(unpack(C.teal))
+            knob:SetColorTexture(unpack(C.teal))
+            knob:ClearAllPoints()
+            knob:SetPoint("RIGHT", track, "RIGHT", -3, 0)
+        else
+            track:SetBackdropColor(unpack(C.bgDark))
+            track:SetBackdropBorderColor(unpack(C.borderSub))
+            knob:SetColorTexture(unpack(C.textDim))
+            knob:ClearAllPoints()
+            knob:SetPoint("LEFT", track, "LEFT", 3, 0)
+        end
+    end
+
+    track:SetScript("OnClick", function()
+        setValue(not getValue())
+        UpdateVisual()
+        if onChanged then onChanged() end
+    end)
+
+    UpdateVisual()
+    return track, labelText, UpdateVisual
+end
+
+-- Abschnitt: Aktive Sprache
+local langLabel = optsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+langLabel:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 16, -20)
+langLabel:SetFont(langLabel:GetFont(), 10, "")
+langLabel:SetTextColor(unpack(C.textDim))
+
+-- DE Button
+local langBtnDE = CreateFrame("Button", nil, optsPanel, "BackdropTemplate")
+langBtnDE:SetSize(90, 24)
+langBtnDE:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 16, -40)
+BD(langBtnDE, 8)
+local langBtnDEText = langBtnDE:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+langBtnDEText:SetAllPoints()
+langBtnDEText:SetFont(langBtnDEText:GetFont(), 10, "")
+
+-- EN Button
+local langBtnEN = CreateFrame("Button", nil, optsPanel, "BackdropTemplate")
+langBtnEN:SetSize(90, 24)
+langBtnEN:SetPoint("LEFT", langBtnDE, "RIGHT", 6, 0)
+BD(langBtnEN, 8)
+local langBtnENText = langBtnEN:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+langBtnENText:SetAllPoints()
+langBtnENText:SetFont(langBtnENText:GetFont(), 10, "")
+
+local function UpdateLangButtons()
+    if NiceOneLanguage == "de" then
+        langBtnDE:SetBackdropColor(unpack(C.tealBg))
+        langBtnDE:SetBackdropBorderColor(unpack(C.teal))
+        langBtnDEText:SetTextColor(unpack(C.teal))
+        langBtnEN:SetBackdropColor(unpack(C.bgDark))
+        langBtnEN:SetBackdropBorderColor(unpack(C.borderSub))
+        langBtnENText:SetTextColor(unpack(C.textDim))
+    else
+        langBtnEN:SetBackdropColor(unpack(C.tealBg))
+        langBtnEN:SetBackdropBorderColor(unpack(C.teal))
+        langBtnENText:SetTextColor(unpack(C.teal))
+        langBtnDE:SetBackdropColor(unpack(C.bgDark))
+        langBtnDE:SetBackdropBorderColor(unpack(C.borderSub))
+        langBtnDEText:SetTextColor(unpack(C.textDim))
+    end
+end
+
+langBtnDE:SetScript("OnClick", function()
+    NiceOneLanguage = "de"
+    UpdateLangButtons()
+    RefreshList()  -- Interface-Sprache aktualisieren
+end)
+
+langBtnEN:SetScript("OnClick", function()
+    NiceOneLanguage = "en"
+    UpdateLangButtons()
+    RefreshList()
+end)
+
+-- Trennlinie
+local optsDivider1 = optsPanel:CreateTexture(nil, "ARTWORK")
+optsDivider1:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 2, -76)
+optsDivider1:SetPoint("TOPRIGHT", optsPanel, "TOPRIGHT", -2, -76)
+optsDivider1:SetHeight(1)
+CT(optsDivider1, unpack(C.borderSub))
+
+-- Abschnitt: Begrüßen in
+local greetInLabel = optsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+greetInLabel:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 16, -92)
+greetInLabel:SetFont(greetInLabel:GetFont(), 10, "")
+greetInLabel:SetTextColor(unpack(C.textDim))
+
+local _, partyToggleLabel, partyToggleUpdate = MakeToggle(
+    optsPanel, "", 16, -116,
+    function() return NiceOneInParty end,
+    function(v) NiceOneInParty = v end
+)
+
+local _, raidToggleLabel, raidToggleUpdate = MakeToggle(
+    optsPanel, "", 140, -116,
+    function() return NiceOneInRaid end,
+    function(v) NiceOneInRaid = v end
+)
+
+-- Trennlinie
+local optsDivider2 = optsPanel:CreateTexture(nil, "ARTWORK")
+optsDivider2:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 2, -152)
+optsDivider2:SetPoint("TOPRIGHT", optsPanel, "TOPRIGHT", -2, -152)
+optsDivider2:SetHeight(1)
+CT(optsDivider2, unpack(C.borderSub))
+
+-- Abschnitt: Party-Modus
+local partyOnceLabel = optsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+partyOnceLabel:SetPoint("TOPLEFT", optsPanel, "TOPLEFT", 16, -168)
+partyOnceLabel:SetFont(partyOnceLabel:GetFont(), 10, "")
+partyOnceLabel:SetTextColor(unpack(C.textDim))
+
+local _, _, partyOnceToggleUpdate = MakeToggle(
+    optsPanel, "", 16, -192,
+    function() return NiceOneInPartyOnce end,
+    function(v) NiceOneInPartyOnce = v end
+)
+
+-- ─── Bestätigungsdialog ───────────────────────────────────────────────────────
+
 local confirmDialog = CreateFrame("Frame", "NiceOneConfirm", UIParent, "BackdropTemplate")
 confirmDialog:SetSize(300, 130)
 confirmDialog:SetPoint("CENTER", window, "CENTER", 0, 0)
@@ -355,232 +507,29 @@ confirmDelete:SetScript("OnClick", function()
     end
 end)
 
--- Feste Rows
-local MAX_ROWS = 10
-local rows = {}
+-- ─── Impressum Popup ──────────────────────────────────────────────────────────
 
-for i = 1, MAX_ROWS do
-    local rowFrame = CreateFrame("Frame", nil, window, "BackdropTemplate")
-    rowFrame:SetSize(400, 28)
-    rowFrame:SetBackdrop({
-        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-        edgeSize = 0,
-    })
-    rowFrame:SetBackdropColor(0,0,0,0)
-    rowFrame:EnableMouse(true)
-    rowFrame:Hide()
-
-    local msgText = rowFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    msgText:SetPoint("LEFT", rowFrame, "LEFT", 8, 0)
-    msgText:SetWidth(340)
-    msgText:SetJustifyH("LEFT")
-    msgText:SetFont(msgText:GetFont(), 11, "")
-    msgText:SetTextColor(unpack(C.textMuted))
-
-    local editBtn = CreateFrame("Button", nil, window, "BackdropTemplate")
-    editBtn:SetSize(36, 22)
-    BD(editBtn, 8)
-    editBtn:SetBackdropColor(unpack(C.tealBg))
-    editBtn:SetBackdropBorderColor(unpack(C.tealDim))
-    editBtn:Hide()
-    local editTex = editBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    editTex:SetAllPoints()
-    editTex:SetText("edit")
-    editTex:SetFont(editTex:GetFont(), 9, "")
-    editTex:SetTextColor(unpack(C.teal))
-
-    local delBtn = CreateFrame("Button", nil, window, "BackdropTemplate")
-    delBtn:SetSize(30, 22)
-    BD(delBtn, 8)
-    delBtn:SetBackdropColor(unpack(C.redBg))
-    delBtn:SetBackdropBorderColor(unpack(C.redBorder))
-    delBtn:Hide()
-    local delTex = delBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    delTex:SetAllPoints()
-    delTex:SetText("del")
-    delTex:SetFont(delTex:GetFont(), 9, "")
-    delTex:SetTextColor(unpack(C.red))
-
-    rows[i] = {
-        frame  = rowFrame,
-        text   = msgText,
-        edit   = editBtn,
-        editTx = editTex,
-        del    = delBtn,
-        delTx  = delTex,
-    }
-end
-
--- Tabs aktualisieren
-local function UpdateTabs()
-    if activeTab == "de" then
-        tabDEText:SetTextColor(unpack(C.teal))
-        CT(tabDELine, unpack(C.teal))
-        tabENText:SetTextColor(unpack(C.textDim))
-        CT(tabENLine, 0,0,0,0)
-    else
-        tabENText:SetTextColor(unpack(C.teal))
-        CT(tabENLine, unpack(C.teal))
-        tabDEText:SetTextColor(unpack(C.textDim))
-        CT(tabDELine, 0,0,0,0)
-    end
-
-    if NiceOneLanguage == "de" then
-        tabDEDot:Show()
-        tabENDot:Hide()
-    else
-        tabENDot:Show()
-        tabDEDot:Hide()
-    end
-
-    if NiceOneLanguage ~= activeTab then
-        tabHint:SetText(L("clickAgain"))
-    else
-        tabHint:SetText("")
-    end
-end
-
--- Lokalisierung
-local function UpdateLocale()
-    checkLabel:SetText(L("greetIn"))
-    partyLabel:SetText("Party")
-    raidLabel:SetText("Raid")
-    confirmTitle:SetText(L("removeMsg"))
-    confirmCancelText:SetText(L("cancel"))
-    confirmDeleteText:SetText(L("delete"))
-    if selectedIndex then
-        addBtnText:SetText(L("save"))
-    else
-        addBtnText:SetText(L("add"))
-    end
-end
-
--- RefreshList
-function RefreshList()
-    UpdateTabs()
-    UpdateLocale()
-    partyUpdate()
-    raidUpdate()
-
-    local messages = NiceOneMessages[activeTab]
-
-    for i = 1, MAX_ROWS do
-        rows[i].frame:Hide()
-        rows[i].edit:Hide()
-        rows[i].del:Hide()
-    end
-
-    for i, msg in ipairs(messages) do
-        if i > MAX_ROWS then break end
-        local yOffset = -70 + ((i-1) * -30)
-        local r = rows[i]
-
-        r.frame:ClearAllPoints()
-        r.frame:SetPoint("TOPLEFT", window, "TOPLEFT", 12, yOffset)
-        r.frame:SetBackdropColor(0,0,0,0)
-        r.frame:Show()
-
-        r.text:SetText(msg)
-        r.text:SetTextColor(unpack(C.textMuted))
-
-        r.edit:ClearAllPoints()
-        r.edit:SetPoint("TOPLEFT", window, "TOPLEFT", 410, yOffset - 3)
-        r.edit:Show()
-
-        r.del:ClearAllPoints()
-        r.del:SetPoint("TOPLEFT", window, "TOPLEFT", 450, yOffset - 3)
-        r.del:Show()
-
-        local capturedI = i
-        r.frame:SetScript("OnEnter", function()
-            r.frame:SetBackdropColor(unpack(C.bgHover))
-            r.text:SetTextColor(unpack(C.textMain))
-        end)
-        r.frame:SetScript("OnLeave", function()
-            r.frame:SetBackdropColor(0,0,0,0)
-            r.text:SetTextColor(unpack(C.textMuted))
-        end)
-        r.edit:SetScript("OnClick", function()
-            selectedIndex = capturedI
-            inputBox:SetText(NiceOneMessages[activeTab][capturedI])
-            inputBox:SetFocus()
-            addBtnText:SetText(L("save"))
-        end)
-        r.del:SetScript("OnClick", function()
-            selectedIndex = capturedI
-            confirmMsgText:SetText('"' .. NiceOneMessages[activeTab][capturedI] .. '"')
-            confirmDialog:Show()
-        end)
-    end
-end
-
--- Tab Klicks
-tabDE:SetScript("OnMouseDown", function()
-    if activeTab == "de" then
-        NiceOneLanguage = "de"
-        print(NiceOneL["de"].langSet)
-    else
-        activeTab = "de"
-        selectedIndex = nil
-        inputBox:SetText("")
-        inputBox:ClearFocus()
-    end
-    RefreshList()
-end)
-
-tabEN:SetScript("OnMouseDown", function()
-    if activeTab == "en" then
-        NiceOneLanguage = "en"
-        print(NiceOneL["en"].langSet)
-    else
-        activeTab = "en"
-        selectedIndex = nil
-        inputBox:SetText("")
-        inputBox:ClearFocus()
-    end
-    RefreshList()
-end)
-
--- Toggle
-function NiceOneUI_Toggle()
-    if window:IsShown() then
-        window:Hide()
-    else
-        selectedIndex = nil
-        RefreshList()
-        window:Show()
-    end
-end
--- Impressum Popup
 local infoPopup = CreateFrame("Frame", "NiceOneInfoPopup", UIParent, "BackdropTemplate")
 infoPopup:SetSize(340, 260)
 infoPopup:SetPoint("CENTER", window, "CENTER", 0, 0)
-infoPopup:SetBackdrop({
-    bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
-    edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-    edgeSize = 14,
-    insets   = {left=3, right=3, top=3, bottom=3},
-})
+BD(infoPopup, 14)
 infoPopup:SetBackdropColor(unpack(C.bgDark))
 infoPopup:SetBackdropBorderColor(unpack(C.teal))
 infoPopup:SetFrameStrata("TOOLTIP")
 infoPopup:Hide()
 
--- Titel
 local infoTitle = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 infoTitle:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -14)
 infoTitle:SetTextColor(unpack(C.teal))
 infoTitle:SetFont(infoTitle:GetFont(), 11, "")
 infoTitle:SetText("NiceOne – Info & Support")
 
--- Trennlinie
 local infoLine = infoPopup:CreateTexture(nil, "ARTWORK")
 infoLine:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 3, -30)
 infoLine:SetPoint("TOPRIGHT", infoPopup, "TOPRIGHT", -3, -30)
 infoLine:SetHeight(1)
 CT(infoLine, unpack(C.teal))
 
--- Haftungsausschluss DE
 local infoTextDE = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 infoTextDE:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -42)
 infoTextDE:SetWidth(310)
@@ -589,14 +538,12 @@ infoTextDE:SetFont(infoTextDE:GetFont(), 9, "")
 infoTextDE:SetTextColor(unpack(C.textMuted))
 infoTextDE:SetText("Dieses Addon wird ohne Gewähr bereitgestellt.\nDer Autor übernimmt keine Verantwortung für\nNachrichten die über dieses Addon gesendet\nwerden oder daraus entstehende Konsequenzen.")
 
--- Trennlinie 2
 local infoLine2 = infoPopup:CreateTexture(nil, "ARTWORK")
 infoLine2:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 3, -110)
 infoLine2:SetPoint("TOPRIGHT", infoPopup, "TOPRIGHT", -3, -110)
 infoLine2:SetHeight(1)
 CT(infoLine2, unpack(C.borderSub))
 
--- Haftungsausschluss EN
 local infoTextEN = infoPopup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 infoTextEN:SetPoint("TOPLEFT", infoPopup, "TOPLEFT", 14, -118)
 infoTextEN:SetWidth(310)
@@ -605,15 +552,10 @@ infoTextEN:SetFont(infoTextEN:GetFont(), 9, "")
 infoTextEN:SetTextColor(unpack(C.textDim))
 infoTextEN:SetText("This addon is provided as-is. The author is not\nresponsible for any messages sent through this\naddon or any consequences arising from its use.")
 
--- Discord Button
 local discordBtn = CreateFrame("Button", nil, infoPopup, "BackdropTemplate")
 discordBtn:SetSize(140, 24)
 discordBtn:SetPoint("BOTTOMLEFT", infoPopup, "BOTTOMLEFT", 14, 14)
-discordBtn:SetBackdrop({
-    bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
-    edgeSize = 0,
-    insets  = {left=2, right=2, top=2, bottom=2},
-})
+BD(discordBtn, 8)
 discordBtn:SetBackdropColor(unpack(C.tealBg))
 local discordTex = discordBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 discordTex:SetAllPoints()
@@ -621,7 +563,6 @@ discordTex:SetFont(discordTex:GetFont(), 9, "")
 discordTex:SetTextColor(unpack(C.teal))
 discordTex:SetText("Join Discord")
 discordBtn:SetScript("OnClick", function()
-    -- Platzhalter: später echten Link einfügen
     print("https://discord.gg/bZGA353KYx")
 end)
 discordBtn:SetScript("OnEnter", function()
@@ -631,15 +572,10 @@ discordBtn:SetScript("OnLeave", function()
     discordBtn:SetBackdropColor(unpack(C.tealBg))
 end)
 
--- Feedback Button
 local supportBtn = CreateFrame("Button", nil, infoPopup, "BackdropTemplate")
 supportBtn:SetSize(140, 24)
 supportBtn:SetPoint("BOTTOMRIGHT", infoPopup, "BOTTOMRIGHT", -14, 14)
-supportBtn:SetBackdrop({
-    bgFile  = "Interface/Tooltips/UI-Tooltip-Background",
-    edgeSize = 0,
-    insets  = {left=2, right=2, top=2, bottom=2},
-})
+BD(supportBtn, 8)
 supportBtn:SetBackdropColor(unpack(C.tealBg))
 local supportTex = supportBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 supportTex:SetAllPoints()
@@ -647,7 +583,6 @@ supportTex:SetFont(supportTex:GetFont(), 9, "")
 supportTex:SetTextColor(unpack(C.teal))
 supportTex:SetText("Submit Alpha Feedback")
 supportBtn:SetScript("OnClick", function()
-    -- Platzhalter: später echten Link einfügen
     print("https://discord.gg/59KbxVRDpn")
 end)
 supportBtn:SetScript("OnEnter", function()
@@ -657,22 +592,15 @@ supportBtn:SetScript("OnLeave", function()
     supportBtn:SetBackdropColor(unpack(C.tealBg))
 end)
 
--- Popup schließen wenn außerhalb geklickt
 infoPopup:SetScript("OnMouseDown", function(self, button)
-    if button == "RightButton" or button == "LeftButton" then
-        infoPopup:Hide()
-    end
+    infoPopup:Hide()
 end)
 
 -- "i" Button im Footer
 local infoBtn = CreateFrame("Button", nil, window, "BackdropTemplate")
 infoBtn:SetSize(18, 18)
 infoBtn:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -10, 11)
-infoBtn:SetBackdrop({
-    bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
-    edgeSize = 0,
-    insets   = {left=2, right=2, top=2, bottom=2},
-})
+BD(infoBtn, 8)
 infoBtn:SetBackdropColor(unpack(C.bgMid))
 local infoBtnTex = infoBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 infoBtnTex:SetAllPoints()
@@ -694,3 +622,172 @@ infoBtn:SetScript("OnLeave", function()
     infoBtnTex:SetTextColor(unpack(C.textMuted))
     infoBtn:SetBackdropColor(unpack(C.bgMid))
 end)
+
+-- ─── Haupt-Tab Logik ──────────────────────────────────────────────────────────
+
+local function UpdateMainTabs()
+    if mainTab == "greetings" then
+        mainTabGreetText:SetTextColor(unpack(C.teal))
+        CT(mainTabGreetLine, unpack(C.teal))
+        mainTabOptsText:SetTextColor(unpack(C.textDim))
+        CT(mainTabOptsLine, 0, 0, 0, 0)
+        greetPanel:Show()
+        optsPanel:Hide()
+    else
+        mainTabOptsText:SetTextColor(unpack(C.teal))
+        CT(mainTabOptsLine, unpack(C.teal))
+        mainTabGreetText:SetTextColor(unpack(C.textDim))
+        CT(mainTabGreetLine, 0, 0, 0, 0)
+        optsPanel:Show()
+        greetPanel:Hide()
+    end
+end
+
+local function UpdateSubTabs()
+    if activeTab == "de" then
+        tabDEText:SetTextColor(unpack(C.teal))
+        CT(tabDELine, unpack(C.teal))
+        tabENText:SetTextColor(unpack(C.textDim))
+        CT(tabENLine, 0, 0, 0, 0)
+    else
+        tabENText:SetTextColor(unpack(C.teal))
+        CT(tabENLine, unpack(C.teal))
+        tabDEText:SetTextColor(unpack(C.textDim))
+        CT(tabDELine, 0, 0, 0, 0)
+    end
+end
+
+-- Alle sprachabhängigen Texte aktualisieren
+local function UpdateLocale()
+    -- Haupt-Tabs
+    mainTabGreetText:SetText(L("tabGreetings"))
+    mainTabOptsText:SetText(L("tabOptions"))
+
+    -- Sub-Tabs (DE/EN zur Bearbeitung)
+    tabDEText:SetText(L("tabDE"))
+    tabENText:SetText(L("tabEN"))
+
+    -- Optionen
+    langLabel:SetText(L("optLanguage"))
+    langBtnDEText:SetText(L("tabDE"))
+    langBtnENText:SetText(L("tabEN"))
+    greetInLabel:SetText(L("greetIn"))
+    partyToggleLabel:SetText(L("optParty"))
+    raidToggleLabel:SetText(L("optRaid"))
+    partyOnceLabel:SetText(L("optPartyOnce"))
+
+    -- Buttons
+    if selectedIndex then
+        addBtnText:SetText(L("save"))
+    else
+        addBtnText:SetText(L("add"))
+    end
+
+    -- Bestätigungsdialog
+    confirmTitle:SetText(L("removeMsg"))
+    confirmCancelText:SetText(L("cancel"))
+    confirmDeleteText:SetText(L("delete"))
+end
+
+-- ─── RefreshList ──────────────────────────────────────────────────────────────
+
+function RefreshList()
+    UpdateLocale()
+    UpdateMainTabs()
+    UpdateSubTabs()
+    UpdateLangButtons()
+    partyToggleUpdate()
+    raidToggleUpdate()
+    partyOnceToggleUpdate()
+
+    local messages = NiceOneMessages[activeTab]
+
+    for i = 1, MAX_ROWS do
+        rows[i].frame:Hide()
+        rows[i].edit:Hide()
+        rows[i].del:Hide()
+    end
+
+    for i, msg in ipairs(messages) do
+        if i > MAX_ROWS then break end
+        local yOffset = -40 + ((i - 1) * -30)
+        local r = rows[i]
+
+        r.frame:ClearAllPoints()
+        r.frame:SetPoint("TOPLEFT", greetPanel, "TOPLEFT", 12, yOffset)
+        r.frame:SetBackdropColor(0, 0, 0, 0)
+        r.frame:Show()
+
+        r.text:SetText(msg)
+        r.text:SetTextColor(unpack(C.textMuted))
+
+        r.edit:ClearAllPoints()
+        r.edit:SetPoint("TOPLEFT", greetPanel, "TOPLEFT", 410, yOffset - 3)
+        r.edit:Show()
+
+        r.del:ClearAllPoints()
+        r.del:SetPoint("TOPLEFT", greetPanel, "TOPLEFT", 450, yOffset - 3)
+        r.del:Show()
+
+        local capturedI = i
+        r.frame:SetScript("OnEnter", function()
+            r.frame:SetBackdropColor(unpack(C.bgHover))
+            r.text:SetTextColor(unpack(C.textMain))
+        end)
+        r.frame:SetScript("OnLeave", function()
+            r.frame:SetBackdropColor(0, 0, 0, 0)
+            r.text:SetTextColor(unpack(C.textMuted))
+        end)
+        r.edit:SetScript("OnClick", function()
+            selectedIndex = capturedI
+            inputBox:SetText(NiceOneMessages[activeTab][capturedI])
+            inputBox:SetFocus()
+            addBtnText:SetText(L("save"))
+        end)
+        r.del:SetScript("OnClick", function()
+            selectedIndex = capturedI
+            confirmMsgText:SetText('"' .. NiceOneMessages[activeTab][capturedI] .. '"')
+            confirmDialog:Show()
+        end)
+    end
+end
+
+-- ─── Tab Klicks ───────────────────────────────────────────────────────────────
+
+mainTabGreet:SetScript("OnMouseDown", function()
+    mainTab = "greetings"
+    RefreshList()
+end)
+
+mainTabOpts:SetScript("OnMouseDown", function()
+    mainTab = "options"
+    RefreshList()
+end)
+
+tabDE:SetScript("OnMouseDown", function()
+    activeTab = "de"
+    selectedIndex = nil
+    inputBox:SetText("")
+    inputBox:ClearFocus()
+    RefreshList()
+end)
+
+tabEN:SetScript("OnMouseDown", function()
+    activeTab = "en"
+    selectedIndex = nil
+    inputBox:SetText("")
+    inputBox:ClearFocus()
+    RefreshList()
+end)
+
+-- ─── Toggle ───────────────────────────────────────────────────────────────────
+
+function NiceOneUI_Toggle()
+    if window:IsShown() then
+        window:Hide()
+    else
+        selectedIndex = nil
+        RefreshList()
+        window:Show()
+    end
+end

@@ -25,15 +25,17 @@ jobs:
           zip -r NiceOne.zip NiceOne/
           mv NiceOne.zip $GITHUB_WORKSPACE/
 
-      - name: Release auf GitHub erstellen
-        run: |
-          echo "${{ inputs.notes }}" > /tmp/release_notes.txt
-          gh release create "${{ inputs.tag }}" NiceOne.zip \
-            --title "${{ inputs.tag }}" \
-            --notes-file /tmp/release_notes.txt
+     - name: Release auf GitHub erstellen
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          NOTES: ${{ inputs.notes }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          printf '%s' "$NOTES" > /tmp/release_notes.txt
+          gh release create "$TAG" NiceOne.zip \
+            --title "$TAG" \
+            --notes-file /tmp/release_notes.txt
+            
       - name: Discord Nachricht senden
         env:
           NOTES: ${{ inputs.notes }}

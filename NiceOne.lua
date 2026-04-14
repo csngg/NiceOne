@@ -3,57 +3,65 @@
 NiceOneL = {
     de = {
         -- UI Tabs
-        tabGreetings = "Begrüßungen",
-        tabOptions   = "Optionen",
-        tabDE        = "Deutsch",
-        tabEN        = "Englisch",
+        tabGreetings   = "Begrüßungen",
+        tabOptions     = "Optionen",
+        tabDE          = "Deutsch",
+        tabEN          = "Englisch",
 
         -- Optionen Labels
-        optLanguage  = "Aktive Sprache:",
-        optParty     = "Party",
-        optRaid      = "Raid",
-        optPartyOnce = "Einmalig in Party",
-        greetIn      = "Begrüßen in:",
+        optLanguage    = "Aktive Sprache:",
+        optParty       = "Party",
+        optRaid        = "Raid",
+        optPartyOnce   = "Einmalig in Party",
+        greetIn        = "Begrüßen in:",
+        optCustomLangs = "Eigene Sprachen:",
 
         -- Eingabe / Buttons
-        add          = "+ hinzufügen",
-        save         = "speichern",
-        cancel       = "abbrechen",
-        delete       = "löschen",
-        removeMsg    = "Nachricht entfernen?",
-        placeholder  = "Neue Begrüßung eingeben...",
+        add            = "+ hinzufügen",
+        save           = "speichern",
+        cancel         = "abbrechen",
+        delete         = "löschen",
+        removeMsg      = "Nachricht entfernen?",
+        placeholder    = "Neue Begrüßung eingeben...",
+        newLangTitle   = "Neue Sprache",
+        newLangHint    = "Name eingeben (max. 12 Zeichen)",
+        deleteLang     = "Sprache löschen?",
 
         -- System Nachrichten
-        msgSaved     = "NiceOne: Nachricht gespeichert.",
-        noMessages   = "NiceOne: Keine Nachrichten vorhanden!",
-        uiNotLoaded  = "NiceOne: UI nicht geladen.",
+        msgSaved       = "NiceOne: Nachricht gespeichert.",
+        noMessages     = "NiceOne: Keine Nachrichten vorhanden!",
+        uiNotLoaded    = "NiceOne: UI nicht geladen.",
     },
     en = {
         -- UI Tabs
-        tabGreetings = "Greetings",
-        tabOptions   = "Options",
-        tabDE        = "German",
-        tabEN        = "English",
+        tabGreetings   = "Greetings",
+        tabOptions     = "Options",
+        tabDE          = "German",
+        tabEN          = "English",
 
         -- Options Labels
-        optLanguage  = "Active language:",
-        optParty     = "Party",
-        optRaid      = "Raid",
-        optPartyOnce = "Once in Party",
-        greetIn      = "Greet in:",
+        optLanguage    = "Active language:",
+        optParty       = "Party",
+        optRaid        = "Raid",
+        optPartyOnce   = "Once in Party",
+        greetIn        = "Greet in:",
+        optCustomLangs = "Custom languages:",
 
         -- Input / Buttons
-        add          = "+ add",
-        save         = "save",
-        cancel       = "cancel",
-        delete       = "delete",
-        removeMsg    = "Remove message?",
-        placeholder  = "Enter new greeting...",
+        add            = "+ add",
+        save           = "save",
+        cancel         = "cancel",
+        delete         = "delete",
+        removeMsg      = "Remove message?",
+        placeholder    = "Enter new greeting...",
+        newLangTitle   = "New language",
+        newLangHint    = "Enter name (max. 12 characters)",
+        deleteLang     = "Delete language?",
 
         -- System Messages
-        msgSaved     = "NiceOne: Message saved.",
-        noMessages   = "NiceOne: No messages available!",
-        uiNotLoaded  = "NiceOne: UI not loaded.",
+        msgSaved       = "NiceOne: Message saved.",
+        noMessages     = "NiceOne: No messages available!",
+        uiNotLoaded    = "NiceOne: UI not loaded.",
     },
 }
 
@@ -72,17 +80,23 @@ local defaultMessages = {
     },
 }
 
+-- UI-Sprache: custom-Sprachen -> immer Englisch, de/en -> aktive Sprache
+function NiceOneUILanguage()
+    if NiceOneLanguage == "de" then
+        return "de"
+    end
+    return "en"
+end
+
 local function InitDB()
     if not NiceOneDB then
         NiceOneDB = {
-            language  = "de",
-            inParty   = true,
-            inRaid    = true,
-            partyOnce = false,
-            messages  = {
-                de = {},
-                en = {},
-            },
+            language    = "de",
+            inParty     = true,
+            inRaid      = true,
+            partyOnce   = false,
+            customLangs = {},
+            messages    = { de = {}, en = {} },
         }
         for _, msg in ipairs(defaultMessages.de) do
             table.insert(NiceOneDB.messages.de, msg)
@@ -92,9 +106,32 @@ local function InitDB()
         end
     end
 
-    -- Sicherheitsnetz: falls DB aus alter Version kommt und partyOnce fehlt
+    -- Sicherheitsnetz: fehlende Felder aus alten Versionen ergänzen
     if NiceOneDB.partyOnce == nil then
         NiceOneDB.partyOnce = false
+    end
+    if NiceOneDB.customLangs == nil then
+        NiceOneDB.customLangs = {}
+    end
+
+    -- Migration: alte custom1Name/custom2Name Felder aus v1.2.0-alpha
+    if NiceOneDB.custom1Name then
+        if #NiceOneDB.customLangs < 2 then
+            local key = "custom" .. tostring(#NiceOneDB.customLangs + 1)
+            table.insert(NiceOneDB.customLangs, {key = key, name = NiceOneDB.custom1Name})
+            NiceOneDB.messages[key] = NiceOneDB.messages.custom1 or {}
+        end
+        NiceOneDB.custom1Name   = nil
+        NiceOneDB.messages.custom1 = nil
+    end
+    if NiceOneDB.custom2Name then
+        if #NiceOneDB.customLangs < 2 then
+            local key = "custom" .. tostring(#NiceOneDB.customLangs + 1)
+            table.insert(NiceOneDB.customLangs, {key = key, name = NiceOneDB.custom2Name})
+            NiceOneDB.messages[key] = NiceOneDB.messages.custom2 or {}
+        end
+        NiceOneDB.custom2Name   = nil
+        NiceOneDB.messages.custom2 = nil
     end
 
     NiceOneMessages    = NiceOneDB.messages
@@ -102,21 +139,23 @@ local function InitDB()
     NiceOneInParty     = NiceOneDB.inParty
     NiceOneInRaid      = NiceOneDB.inRaid
     NiceOneInPartyOnce = NiceOneDB.partyOnce
+    NiceOneCustomLangs = NiceOneDB.customLangs
 end
 
 local function SaveDB()
-    NiceOneDB.language  = NiceOneLanguage
-    NiceOneDB.inParty   = NiceOneInParty
-    NiceOneDB.inRaid    = NiceOneInRaid
-    NiceOneDB.partyOnce = NiceOneInPartyOnce
-    NiceOneDB.messages  = NiceOneMessages
+    NiceOneDB.language    = NiceOneLanguage
+    NiceOneDB.inParty     = NiceOneInParty
+    NiceOneDB.inRaid      = NiceOneInRaid
+    NiceOneDB.partyOnce   = NiceOneInPartyOnce
+    NiceOneDB.customLangs = NiceOneCustomLangs
+    NiceOneDB.messages    = NiceOneMessages
 end
 
 local lastIndex       = nil
 local inRaid          = false
 local raidGreeted     = false
 local instanceGreeted = false
-local partyGreeted    = false   -- neu: für einmalige Party-Begrüßung
+local partyGreeted    = false
 local partyMembers    = {}
 local lastGroupSize   = 0
 
@@ -135,9 +174,9 @@ end
 
 local function SendGreeting()
     local messages = NiceOneMessages[NiceOneLanguage]
-    local L = NiceOneL[NiceOneLanguage]
+    local Lx       = NiceOneL[NiceOneUILanguage()]
     if not messages or #messages == 0 then
-        print(L.noMessages)
+        print(Lx.noMessages)
         return
     end
 
@@ -189,51 +228,33 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     end
 
     if event == "PLAYER_ENTERING_WORLD" then
-        partyMembers  = GetCurrentPartyMembers()
-        lastGroupSize = GetNumGroupMembers()
-        inRaid        = IsInRaid()
-        raidGreeted   = false
+        partyMembers    = GetCurrentPartyMembers()
+        lastGroupSize   = GetNumGroupMembers()
+        inRaid          = IsInRaid()
+        raidGreeted     = false
         instanceGreeted = false
-        partyGreeted  = false
+        partyGreeted    = false
         return
     end
 
     if event == "GROUP_JOINED" then
         if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) and not instanceGreeted then
             instanceGreeted = true
-            C_Timer.After(2.5, function()
-                if NiceOneInParty then
-                    SendGreeting()
-                end
+            C_Timer.After(math.random(2, 7), function()
+                if NiceOneInParty then SendGreeting() end
             end)
         elseif IsInRaid() and not raidGreeted then
             raidGreeted = true
-            C_Timer.After(2.5, function()
-                if NiceOneInRaid then
-                    SendGreeting()
-                end
+            C_Timer.After(math.random(2, 7), function()
+                if NiceOneInRaid then SendGreeting() end
             end)
         elseif IsInGroup() and not IsInRaid() and not IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
-            -- Normale Party über Einladung: du selbst joiningst
-            if NiceOneInParty then
-                if NiceOneInPartyOnce and not partyGreeted then
-                    partyGreeted = true
-                    C_Timer.After(2.5, function()
-                        SendGreeting()
-                    end)
-                elseif not NiceOneInPartyOnce then
-                    partyGreeted = true
-                    C_Timer.After(2.5, function()
-                        SendGreeting()
-                    end)
-                end
-            end
         end
         return
     end
 
     if event == "GROUP_ROSTER_UPDATE" then
-        C_Timer.After(2.5, function()
+        C_Timer.After(math.random(2, 7), function()
             if IsInRaid() then
                 if not inRaid and NiceOneInRaid and not raidGreeted then
                     SendGreeting()
@@ -248,11 +269,9 @@ frame:SetScript("OnEvent", function(self, event, arg1)
                         SendGreeting()
                     end
                 else
-                    -- Normale Party: jemand neues ist dazugekommen
                     if NiceOneInParty then
                         local current     = GetCurrentPartyMembers()
                         local currentSize = GetNumGroupMembers()
-
                         if currentSize > lastGroupSize then
                             local newPlayerFound = false
                             for name, _ in pairs(current) do
@@ -260,30 +279,25 @@ frame:SetScript("OnEvent", function(self, event, arg1)
                                     newPlayerFound = true
                                 end
                             end
-
                             if newPlayerFound then
                                 if NiceOneInPartyOnce then
-                                    -- Einmalig: nur grüßen wenn noch nicht gegrüßt
                                     if not partyGreeted then
                                         partyGreeted = true
                                         SendGreeting()
                                     end
                                 else
-                                    -- Standard: jeden neuen Spieler begrüßen
                                     SendGreeting()
                                 end
                             end
                         end
-
                         lastGroupSize = currentSize
                         partyMembers  = current
                     end
                 end
-                inRaid       = false
-                raidGreeted  = false
+                inRaid      = false
+                raidGreeted = false
 
             else
-                -- Gruppe verlassen: alles zurücksetzen
                 partyMembers    = {}
                 lastGroupSize   = 0
                 inRaid          = false
@@ -301,6 +315,6 @@ SlashCmdList["NICEONE"] = function(input)
     if NiceOneUI_Toggle then
         NiceOneUI_Toggle()
     else
-        print(NiceOneL[NiceOneLanguage or "de"].uiNotLoaded)
+        print(NiceOneL[NiceOneUILanguage()].uiNotLoaded)
     end
 end

@@ -1,49 +1,56 @@
 # NiceOne – Release Notes
 
-## v1.1.1-alpha
+## v1.2.0-alpha
+_14. April 2026_
+
+### Neu: Benutzerdefinierte Sprachen (Language Slots 3 & 4)
+
+Im Optionen-Tab gibt es jetzt zwei zusätzliche Sprach-Slots die du selbst benennen kannst.
+
+- Namen können direkt im Optionen-Tab vergeben werden (max. 12 Zeichen)
+- Jeder Slot hat eine eigene Nachrichtenliste im Begrüßungen-Tab
+- Keine vorgefertigten Beispielnachrichten – du startest mit einer leeren Liste
+- Sobald ein Slot als aktive Sprache gewählt ist, sendet das Addon Begrüßungen aus dieser Liste
+- Das UI bleibt auf Englisch wenn Slot 3 oder 4 aktiv ist
+
+### Neu: Zufällige Verzögerung vor der Begrüßung
+
+Bisher hat NiceOne immer nach genau 2,5 Sekunden gegrüßt. Das wirkte bei mehreren Spielern mit dem Addon zu maschinell. Die Verzögerung ist jetzt zufällig zwischen 2 und 7 Sekunden. Jede Begrüßung wird unabhängig ausgewürfelt.
+
+---
+
+## v1.1.0-alpha
 _13. April 2026_
 
 ### Neu: Überarbeitetes Interface
 
-Das UI wurde grundlegend neu strukturiert. Das Fenster ist jetzt in zwei Tabs aufgeteilt:
+Das Fenster ist jetzt in zwei Tabs aufgeteilt:
 
-- **Begrüßungen** – Nachrichten verwalten, nach Sprache (Deutsch / Englisch) gefiltert
+- **Begrüßungen** – Nachrichten verwalten, nach Sprache gefiltert
 - **Optionen** – alle Einstellungen an einem Ort
-
-Die Tab-Beschriftungen passen sich automatisch an die aktive Sprache an.
-
----
 
 ### Neu: Sprachauswahl in den Optionen
 
-Die aktive Begrüßungssprache wird jetzt direkt im Optionen-Tab gesetzt – klar und eindeutig. Der bisherige Doppelklick-Mechanismus auf den Sprach-Tabs wurde entfernt.
-
----
+Die aktive Begrüßungssprache wird jetzt direkt im Optionen-Tab gesetzt.
 
 ### Neu: Einmalige Begrüßung in der Party
 
-Im Optionen-Tab gibt es einen neuen Toggle: **„Einmalig in Party"** (EN: „Once in Party").
+Neuer Toggle im Optionen-Tab: **„Einmalig in Party"**
 
-- **Aus (Standard):** Jeder neue Spieler der der Party beitritt wird einzeln begrüßt.
-- **An:** Die Begrüßung wird nur einmal gesendet – beim ersten Beitritt zur Gruppe.
+- **Aus (Standard):** Jeder neue Spieler der der Party beitritt wird einzeln begrüßt
+- **An:** Die Begrüßung wird nur beim ersten Beitritt zur Gruppe gesendet
 
----
-
-### Sonstiges
-
-- Alle Einstellungen (Sprache, Party/Raid-Toggles, neuer Party-Once-Toggle) werden beim Ausloggen gespeichert und beim nächsten Login wiederhergestellt.
-- Kleine Anpassungen an der Infobox.
-- Code-Struktur intern bereinigt und besser aufgeteilt.
+Alle Einstellungen werden gespeichert und beim Login wiederhergestellt.
 
 ---
 
 ## v1.0.0-alpha
-_Erster öffentlicher Alpha-Release_
+_Erster Alpha-Release_
 
 - Automatische Begrüßung beim Beitreten einer Party oder eines Raids
-- Zufällige Auswahl aus eigenen Nachrichten (keine Wiederholung hintereinander)
-- Begrüßungen auf Deutsch und Englisch verwaltbar
-- Einstellbar ob Party, Raid oder beides begrüßt wird
+- Zufällige Auswahl aus eigenen Nachrichten (keine direkte Wiederholung)
+- Deutsch und Englisch als Sprachen wählbar
+- Party- und Raid-Begrüßung separat aktivierbar
 - Eigene Nachrichten hinzufügen, bearbeiten und löschen
-- Einstellungen werden über Neustarts hinweg gespeichert
+- Einstellungen bleiben über Neustarts gespeichert
 - Slash-Befehle: `/niceone` und `/greet`

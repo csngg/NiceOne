@@ -1,5 +1,4 @@
 name: Release
-
 on:
   workflow_dispatch:
     inputs:
@@ -9,10 +8,8 @@ on:
       notes:
         description: 'Was ist neu?'
         required: true
-
 permissions:
   contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -30,16 +27,19 @@ jobs:
 
       - name: Release auf GitHub erstellen
         run: |
+          echo "${{ inputs.notes }}" > /tmp/release_notes.txt
           gh release create "${{ inputs.tag }}" NiceOne.zip \
             --title "${{ inputs.tag }}" \
-            --notes "${{ inputs.notes }}"
+            --notes-file /tmp/release_notes.txt
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Discord Nachricht senden
+        env:
+          NOTES: ${{ inputs.notes }}
+          TAG: ${{ inputs.tag }}
+          WEBHOOK: ${{ secrets.WEBHOOK_URL }}
         run: |
           curl -H "Content-Type: application/json" \
-          -d "{
-            \"content\": \"@here **NiceOne ${{ inputs.tag }} ist da!**\n\n${{ inputs.notes }}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${{ inputs.tag }}/NiceOne.zip\"
-          }" \
-          ${{ secrets.WEBHOOK_URL }}
+          -d "{\"content\": \"@here **NiceOne ${TAG} ist da!**\n\n${NOTES}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${TAG}/NiceOne.zip\"}" \
+          "$WEBHOOK"

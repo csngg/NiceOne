@@ -38,13 +38,13 @@ jobs:
             --notes-file RELEASE_NOTES.md
 
       - name: Discord Nachricht senden
-  env:
-    MSG: ${{ inputs.discord_msg }}
-    TAG: ${{ inputs.tag }}
-    WEBHOOK: ${{ secrets.WEBHOOK_URL }}
-  run: |
-    CONTENT=$(jq -n --arg tag "$TAG" --arg msg "$MSG" \
-      '"@here **NiceOne \($tag) ist da!**\n\n\($msg)\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/\($tag)/NiceOne.zip\n📋 Release Notes: https://github.com/csngg/NiceOne/releases/tag/\($tag)"')
-    curl -H "Content-Type: application/json" \
-      -d "{\"content\": $CONTENT}" \
-      "$WEBHOOK"
+        env:
+          MSG: ${{ inputs.discord_msg }}
+          TAG: ${{ inputs.tag }}
+          WEBHOOK: ${{ secrets.WEBHOOK_URL }}
+        run: |
+          CONTENT=$(jq -n --arg tag "$TAG" --arg msg "$MSG" \
+            '"@here **NiceOne \($tag) ist da!**\n\n\($msg)\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/\($tag)/NiceOne.zip\n📋 Release Notes: https://github.com/csngg/NiceOne/releases/tag/\($tag)"')
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\": $CONTENT}" \
+            "$WEBHOOK"

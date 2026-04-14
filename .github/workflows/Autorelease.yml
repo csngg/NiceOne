@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Version (z.B. 1.0.5-alpha)'
+        description: 'Version (z.B. 1.1.0-alpha)'
         required: true
-      notes:
-        description: 'Was ist neu?'
+      discord_msg:
+        description: 'Kurze Discord Ankündigung (1-2 Sätze)'
         required: true
 
 permissions:
@@ -29,17 +29,22 @@ jobs:
           mv NiceOne.zip $GITHUB_WORKSPACE/
 
       - name: Release auf GitHub erstellen
-        run: |
-          gh release create "${{ inputs.tag }}" NiceOne.zip \
-            --title "${{ inputs.tag }}" \
-            --notes "${{ inputs.notes }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release create "$TAG" NiceOne.zip \
+            --title "$TAG" \
+            --notes-file RELEASE_NOTES.md
 
       - name: Discord Nachricht senden
-        run: |
-          curl -H "Content-Type: application/json" \
-          -d "{
-            \"content\": \"@here **NiceOne ${{ inputs.tag }} ist da!**\n\n${{ inputs.notes }}\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/${{ inputs.tag }}/NiceOne.zip\"
-          }" \
-          ${{ secrets.WEBHOOK_URL }}
+  env:
+    MSG: ${{ inputs.discord_msg }}
+    TAG: ${{ inputs.tag }}
+    WEBHOOK: ${{ secrets.WEBHOOK_URL }}
+  run: |
+    CONTENT=$(jq -n --arg tag "$TAG" --arg msg "$MSG" \
+      '"@here **NiceOne \($tag) ist da!**\n\n\($msg)\n\n📦 Download: https://github.com/csngg/NiceOne/releases/download/\($tag)/NiceOne.zip\n📋 Release Notes: https://github.com/csngg/NiceOne/releases/tag/\($tag)"')
+    curl -H "Content-Type: application/json" \
+      -d "{\"content\": $CONTENT}" \
+      "$WEBHOOK"
